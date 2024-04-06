@@ -30,16 +30,17 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.flightseach.data.table.Airport
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun MainApp(
     viewModel: FlightViewModel = viewModel(factory = FlightViewModel.factory)
 ) {
-    val searchText = viewModel.SerarchText.collectAsState()
-    val List=  viewModel.getList(searchText.value).collectAsState()
+    val searchText by viewModel.SearchText.collectAsState()
+    val suggestions by viewModel.suggetion.collectAsState()
     Column {
-        SearchBar(text =searchText.value, onvaluechange ={viewModel.onvaluechange(it)}, onSerach = {})
-        ListOfSuggetion(Suggetions = List.value.lsit)
+        SearchBar(text =searchText, onvaluechange =viewModel::onValueCHange, onSerach = {})
+        ListOfSuggetion(Suggetions = suggestions)
     }
 
 }

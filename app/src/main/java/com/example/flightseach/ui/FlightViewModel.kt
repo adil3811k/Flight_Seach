@@ -8,9 +8,13 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.flightseach.FlightAppliction
 import com.example.flightseach.data.Reposiroty
 import com.example.flightseach.data.table.Airport
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -22,18 +26,19 @@ class FlightViewModel(
     private val  reposiroty: Reposiroty
 ):ViewModel() {
 
-    val SerarchText =  MutableStateFlow("")
-fun onvaluechange(Text:String){
-    SerarchText.value = Text
-}
+    private var _SerarchText =  MutableStateFlow("")
+    var SearchText = _SerarchText.asStateFlow()
 
-      fun getList(string: String):StateFlow<mainCalss>{
-         return  reposiroty.getAllLIst(string).map { mainCalss(it) }.stateIn(
-             viewModelScope,
-             SharingStarted.WhileSubscribed(),
-             mainCalss()
-         )
-     }
+    val suggetion : StateFlow<List<Airport>> =_SerarchText.flatMapLatest {
+        reposiroty.getAllLIst(SearchText.value).catch { emit(emptyList()) }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(),
+        emptyList()
+    )
+    fun onValueCHange(string: String){
+        _SerarchText.value = string
+    }
 
     companion object {
         val factory = viewModelFactory {
