@@ -1,6 +1,6 @@
 package com.example.flightseach.ui
 
-import android.content.ClipData.Item
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,83 +13,61 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.flightseach.data.table.Airport
-import kotlinx.coroutines.flow.collectLatest
 
 @Composable
-fun MainApp(
-    viewModel: FlightViewModel = viewModel(factory = FlightViewModel.factory)
-) {
-    val searchText by viewModel.SearchText.collectAsState()
-    val suggestions by viewModel.suggetion.collectAsState()
-    Column {
-        SearchBar(text =searchText, onvaluechange =viewModel::onValueCHange, onSerach = {})
-        ListOfSuggetion(Suggetions = suggestions)
-    }
-
-}
-
-
-
-@Composable
-fun SearchBar(
-    text:String ,
+fun FirstScreen(
+    searchText:String,
     onvaluechange:(String)->Unit,
-    onSerach:()->Unit
+    suggestions:List<Airport>,
+    modifier: Modifier =Modifier,
+    onClick: (Int) -> Unit
 ) {
-    TextField(
-        value = text,
-        onValueChange = onvaluechange,
-        modifier = Modifier
-            .height(100.dp)
-            .padding(20.dp)
-            .fillMaxWidth(),
-        leadingIcon = { Icon(
-            imageVector = Icons.Default.Search,
-            contentDescription = "Search Icons"
-        )},
-        shape = RoundedCornerShape(50)
-    )
 
-}
-
-
-
-
-@Composable
-fun ListOfSuggetion(
-    Suggetions:List<Airport>
-) {
-    LazyColumn {
-        items(Suggetions){it->
-            SuggetionItem(airport = it)
+    Column {
+        TextField(
+            value = searchText,
+            onValueChange =onvaluechange,
+            modifier = Modifier
+                .height(100.dp)
+                .padding(20.dp)
+                .fillMaxWidth(),
+            leadingIcon = { Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Search Icons"
+            )},
+            shape = RoundedCornerShape(50)
+        )
+        LazyColumn {
+            items(suggestions){it->
+                SuggetionItem(airport = it, onClick = onClick)
+            }
         }
     }
+
 }
+
 
 @Composable
 fun SuggetionItem(
-    airport: Airport
+    airport: Airport,
+    onClick:(Int)->Unit,
+    modifier: Modifier=  Modifier
 ) {
     Row(modifier = Modifier
         .padding(horizontal = 12.dp)
-        .fillMaxWidth()) {
+        .fillMaxWidth()
+        .clickable {onClick(airport.id)}) {
         Text(text = airport.iata_code, fontWeight = FontWeight.Bold, modifier = Modifier.weight(0.15f))
         Spacer(modifier = Modifier.width(10.dp))
         Text(text = airport.name, fontWeight = FontWeight.ExtraLight, modifier = Modifier.weight(0.9f))
