@@ -1,7 +1,7 @@
 package com.example.flightseach.ui
 
+import android.util.Log
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,18 +15,30 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.flightseach.data.route
 import com.example.flightseach.data.table.Airport
-
+import com.example.flightseach.data.table.Favorite
 
 
 @Composable
-fun ListShowScreen(string: String, Destinations: List<Airport>,Departuer:Airport ) {
+fun SecondScreen(
+    string: String,
+    Destinations: List<Airport>,
+    Departuer: Airport,
+    onIconclick: (Flight) -> Unit,
+    favorite: List<Favorite>,
+) {
+    Log.d("SecondScreen","Second Screen compose")
+    val  isFavorite = remember{ mutableStateOf(favorite) }
     Column {
         Text(
             text = "Flight form $string ",
@@ -35,19 +47,24 @@ fun ListShowScreen(string: String, Destinations: List<Airport>,Departuer:Airport
             modifier = Modifier.padding(20.dp)
         )
         LazyColumn {
-            items(GetFLight(Departuer,Destinations)){ flight->
-                FlightCard(flight = flight) {
-
-                }
+            items(GetFLight(Departuer,Destinations,isFavorite.value)){ flight->
+                FlightCard(flight = flight , onIconclick = onIconclick)
             }
         }
     }
 }
-private fun GetFLight(Departuer:Airport,Deatinations:List<Airport>):List<Flight>{
+private fun GetFLight(Departuer:Airport,Deatinations:List<Airport>,Favotier:List<Favorite>):List<Flight>{
     var result:MutableList<Flight> = mutableListOf()
     Deatinations.forEach {
         result.add(Flight(Departuer,it))
     }
+    val fav = Favotier.map { route(Departure = it.departure_code, Destination = it.destination_code) }
+    result.forEach {
+        if (fav.contains(route(it.Depature.iata_code,it.Destination.iata_code))){
+            it.isFavorite= true
+        }
+    }
+
     return result
 }
 
@@ -58,14 +75,15 @@ private fun GetFLight(Departuer:Airport,Deatinations:List<Airport>):List<Flight>
 fun FlightCard(
     flight: Flight,
     modifier: Modifier= Modifier,
-    onFavorite:()->Unit
+    onIconclick:(Flight)->Unit
 ) {
+    Log.d("SecondScreen","Flight Card compose")
     Card (
         modifier
             .fillMaxWidth()
             .padding(horizontal = 10.dp, vertical = 5.dp)
     ){
-        Row (){
+        Row {
             val TextModifier = Modifier.padding(start = 10.dp, top = 5.dp, bottom = 5.dp)
             Column (modifier.fillMaxWidth(0.8f)){
                 Text(text = "DEPART",modifier =TextModifier.padding(top = 10.dp))
@@ -85,9 +103,16 @@ fun FlightCard(
                 tint = if (flight.isFavorite) Color.Yellow else Color.White,
                 modifier= modifier
                     .align(Alignment.CenterVertically)
-                    .clickable { onFavorite() }
+                    .clickable { onIconclick(flight) }
                     .size(50.dp)
             )
         }
     }
 }
+/*
+private fun isFavorite(flight: Flight,favorite: List<Favorite>):Boolean {
+    favorite.forEach {
+        return flight.Destination.iata_code == it.destination_code && flight.Depature.iata_code == it.departure_code
+    }
+    return false
+}*/

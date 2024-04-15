@@ -30,7 +30,6 @@ fun FirstScreen(
     searchText:String,
     onvaluechange:(String)->Unit,
     suggestions:List<Airport>,
-    modifier: Modifier =Modifier,
     onClick: (Int) -> Unit
 ) {
 
@@ -49,7 +48,7 @@ fun FirstScreen(
             shape = RoundedCornerShape(50)
         )
         LazyColumn {
-            items(suggestions){it->
+            items(suggestions){
                 SuggetionItem(airport = it, onClick = onClick)
             }
         }
@@ -62,7 +61,6 @@ fun FirstScreen(
 fun SuggetionItem(
     airport: Airport,
     onClick:(Int)->Unit,
-    modifier: Modifier=  Modifier
 ) {
     Row(modifier = Modifier
         .padding(horizontal = 12.dp)

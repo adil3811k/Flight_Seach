@@ -13,6 +13,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.flightseach.FlightAppliction
 import com.example.flightseach.data.Reposiroty
 import com.example.flightseach.data.table.Airport
+import com.example.flightseach.data.table.Favorite
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,7 +41,7 @@ import kotlinx.coroutines.launch
 data class Flight(
     val Depature:Airport,
     val Destination:Airport,
-    val isFavorite:Boolean= false
+    var isFavorite:Boolean= false
 )
 
 
@@ -60,11 +61,20 @@ class FlightViewModel(
         SharingStarted.WhileSubscribed(),
         emptyList()
     )
+    val FavoriteList  = reposiroty.getFavoriteList().stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(),
+        emptyList()
+    )
 
     fun onValueCHange(string: String){
         _SerarchText.value = string
     }
-
+    fun favoriteTroggle(favorite: Favorite){
+        viewModelScope.launch {
+            reposiroty.InserFavorait(favorite)
+        }
+    }
 
 
     companion object {
