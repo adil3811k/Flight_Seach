@@ -106,8 +106,9 @@ fun FlightCard(
     }
 }
 private fun isFavorite(flight: Flight,favorite: List<Favorite>):Boolean {
-    favorite.forEach {
-        return flight.Destination.iata_code == it.destination_code && flight.Depature.iata_code == it.departure_code
+    val fav = favorite.map { route(it.departure_code,it.destination_code) }
+    if (fav.contains(route(flight.Depature.iata_code,flight.Destination.iata_code))){
+        return true
     }
     return false
 }
