@@ -47,23 +47,18 @@ fun SecondScreen(
             modifier = Modifier.padding(20.dp)
         )
         LazyColumn {
-            items(GetFLight(Departuer,Destinations,isFavorite.value)){ flight->
-                FlightCard(flight = flight , onIconclick = onIconclick)
+            items(GetFLight(Departuer,Destinations)){ flight->
+                FlightCard(flight = flight , onIconclick = onIconclick, isfavrite = isFavorite(flight, favorite))
             }
         }
     }
 }
-private fun GetFLight(Departuer:Airport,Deatinations:List<Airport>,Favotier:List<Favorite>):List<Flight>{
+private fun GetFLight(Departuer:Airport,Deatinations:List<Airport>):List<Flight>{
     var result:MutableList<Flight> = mutableListOf()
     Deatinations.forEach {
         result.add(Flight(Departuer,it))
     }
-    val fav = Favotier.map { route(Departure = it.departure_code, Destination = it.destination_code) }
-    result.forEach {
-        if (fav.contains(route(it.Depature.iata_code,it.Destination.iata_code))){
-            it.isFavorite= true
-        }
-    }
+
 
     return result
 }
@@ -75,7 +70,8 @@ private fun GetFLight(Departuer:Airport,Deatinations:List<Airport>,Favotier:List
 fun FlightCard(
     flight: Flight,
     modifier: Modifier= Modifier,
-    onIconclick:(Flight)->Unit
+    onIconclick:(Flight)->Unit,
+    isfavrite:Boolean
 ) {
     Log.d("SecondScreen","Flight Card compose")
     Card (
@@ -100,7 +96,7 @@ fun FlightCard(
             Icon(
                 imageVector = Icons.Default.Star,
                 contentDescription = "Favorite Stare",
-                tint = if (flight.isFavorite) Color.Yellow else Color.White,
+                tint = if (isfavrite) Color.Yellow else Color.White,
                 modifier= modifier
                     .align(Alignment.CenterVertically)
                     .clickable { onIconclick(flight) }
@@ -109,10 +105,9 @@ fun FlightCard(
         }
     }
 }
-/*
 private fun isFavorite(flight: Flight,favorite: List<Favorite>):Boolean {
     favorite.forEach {
         return flight.Destination.iata_code == it.destination_code && flight.Depature.iata_code == it.departure_code
     }
     return false
-}*/
+}
