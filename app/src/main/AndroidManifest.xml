@@ -17,7 +17,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.FlightSeach">
+            android:theme="@style/Base.Theme.SplashScreen.">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

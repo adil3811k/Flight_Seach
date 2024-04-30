@@ -34,7 +34,7 @@ fun SecondScreen(
     string: String,
     Destinations: List<Airport>,
     Departuer: Airport,
-    onIconclick: (Flight) -> Unit,
+    onIconclick: (Flight,Boolean) -> Unit,
     favorite: List<Favorite>,
 ) {
     Log.d("SecondScreen","Second Screen compose")
@@ -70,7 +70,7 @@ private fun GetFLight(Departuer:Airport,Deatinations:List<Airport>):List<Flight>
 fun FlightCard(
     flight: Flight,
     modifier: Modifier= Modifier,
-    onIconclick:(Flight)->Unit,
+    onIconclick:(Flight,Boolean)->Unit,
     isfavrite:Boolean
 ) {
     Log.d("SecondScreen","Flight Card compose")
@@ -99,7 +99,7 @@ fun FlightCard(
                 tint = if (isfavrite) Color.Yellow else Color.White,
                 modifier= modifier
                     .align(Alignment.CenterVertically)
-                    .clickable { onIconclick(flight) }
+                    .clickable { onIconclick(flight,isfavrite) }
                     .size(50.dp)
             )
         }

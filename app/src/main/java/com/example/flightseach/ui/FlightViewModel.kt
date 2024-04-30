@@ -1,10 +1,5 @@
 package com.example.flightseach.ui
 
-import android.util.Log
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
@@ -15,22 +10,14 @@ import com.example.flightseach.data.Reposiroty
 import com.example.flightseach.data.table.Airport
 import com.example.flightseach.data.table.Favorite
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.forEach
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.flow.zip
 import kotlinx.coroutines.launch
 
 
@@ -55,7 +42,7 @@ class FlightViewModel(
     var SearchText = _SerarchText.asStateFlow()
         private set
     val suggetion : StateFlow<List<Airport>> =_SerarchText.flatMapLatest {
-        reposiroty.getAllLIst(SearchText.value).catch { emit(emptyList()) }
+        reposiroty.getSuggedtions(SearchText.value).catch { emit(emptyList()) }
     }.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(),
@@ -66,13 +53,41 @@ class FlightViewModel(
         SharingStarted.WhileSubscribed(),
         emptyList()
     )
-
+    private val  _FavoriteFlight= MutableStateFlow<List<Flight>>(emptyList())
+    val FavoriteFlight = _FavoriteFlight.asStateFlow()
+    val getAllAirport = reposiroty.getAllAirport().stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(),
+        emptyList()
+    )
     fun onValueCHange(string: String){
         _SerarchText.value = string
     }
-    fun favoriteTroggle(favorite: Favorite){
+    fun favoriteTroggle(favorite: Favorite,isFavorite: Boolean){
+        if (isFavorite){
+            viewModelScope.launch {
+                reposiroty.deleteFavorite(favorite.departure_code,favorite.destination_code)
+            }
+        }else{
+            viewModelScope.launch {
+                reposiroty.InserFavorait(favorite)
+            }
+        }
+    }
+    fun getFavoriteFlight(){
+        val result:MutableList<Flight>  = mutableListOf()
         viewModelScope.launch {
-            reposiroty.InserFavorait(favorite)
+            FavoriteList.value.forEach {
+                result.add(
+                    Flight(
+                        Airport(name = reposiroty.getName(it.departure_code), iata_code = it.departure_code),
+                        Airport(name = reposiroty.getName(it.destination_code), iata_code = it.destination_code)
+                    )
+                )
+            }
+            _FavoriteFlight.update {
+                result
+            }
         }
     }
 

@@ -22,14 +22,18 @@ fun MainApp() {
     val viewModel:FlightViewModel = viewModel(factory = FlightViewModel.factory)
     val navController = rememberNavController()
     val serachText by viewModel.SearchText.collectAsState()
-    val AirportList by viewModel.suggetion.collectAsState()
+    val suggestions by viewModel.suggetion.collectAsState()
     val FavoriteList by viewModel.FavoriteList.collectAsState()
+    val FavoriteFlight by viewModel.FavoriteFlight.collectAsState()
+    val AllAirport by viewModel.getAllAirport.collectAsState()
     NavHost(navController = navController, startDestination = Screens.First.name) {
         composable(route=Screens.First.name){
+            viewModel.getFavoriteFlight()
             FirstScreen(
                 searchText = serachText,
                 onvaluechange =viewModel::onValueCHange,
-                suggestions = AirportList
+                suggestions = suggestions,
+                favorites =FavoriteFlight
             ){
                 navController.navigate(Screens.Second.name+"/$it")
             }
@@ -42,16 +46,16 @@ fun MainApp() {
             val id = it.arguments?.getInt("id")
             if (id != null) {
                 SecondScreen(
-                    string = AirportList[id].iata_code,
-                    Destinations =AirportList.filter { it.id != id },
-                    Departuer =AirportList[id-1],
+                    string = AllAirport[id].iata_code,
+                    Destinations =AllAirport.filter { it.id != id },
+                    Departuer =AllAirport[id-1],
                     favorite = FavoriteList,
-                    onIconclick = {
+                    onIconclick = {flight,isFavorite->
                         viewModel.favoriteTroggle(Favorite(
-                            destination_code = it.Destination.iata_code,
-                            departure_code = it.Depature.iata_code
-                                )
-                            )
+                            departure_code =flight.Depature.iata_code,
+                            destination_code =flight.Destination.iata_code),
+                            isFavorite
+                        )
                         }
                     )
                 Text(text = FavoriteList.toString())
